@@ -1,131 +1,72 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import '@walletconnect/react-native-compat'
+import React, { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { NavigationContainer } from "@react-navigation/native";
+import { View } from 'react-native';
+import { AppKitButton, } from '@reown/appkit-wagmi-react-native'
+// WalletConnect/Reown
+import { WagmiProvider } from "wagmi";
+import { mainnet, polygon, arbitrum } from '@wagmi/core/chains'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createAppKit, defaultWagmiConfig, AppKit } from "@reown/appkit-wagmi-react-native";
+import { authConnector } from '@reown/appkit-auth-wagmi-react-native';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const projectId = 'cd256463d437436cb0d1705489006fde';
+// Reown declarations
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const metadata = {
+  name: 'WalletTest',
+  description: 'Unifying CEX/DEX',
+  url: 'https://reown.com/appkit',
+  icons: ['https://avatars.githubusercontent.com/u/179229932'],
+  redirect: {
+  },
+};
+const auth = authConnector({ projectId, metadata })
+const chains = [mainnet, polygon, arbitrum] as const
+const wagmiConfig = defaultWagmiConfig({
+  chains,
+  projectId,
+  metadata,
+  extraConnectors: [auth]
+});
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  createAppKit({
+  projectId,
+  wagmiConfig,
+  metadata,
+  features: {
+    email: true, // default to true
+    socials: ['x', 'apple'], // default value
+    emailShowWallets: true, // default to true
+  }
+});
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const queryClient = new QueryClient();
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
-
+  const navigationRef = React.useRef(null);
+  
   return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </View>
+    <WagmiProvider config={wagmiConfig}>
+      <GestureHandlerRootView style={{ flex: 1 }}>     
+        <NavigationContainer
+          ref={navigationRef}
+        >
+          <QueryClientProvider client={queryClient}>
+  
+            <AppKit />
+            <View style={{backgroundColor: 'pink', flex: 1, justifyContent: 'center'}}>
+              <AppKitButton />
+            </View>
+
+          </QueryClientProvider>
+        </NavigationContainer>
+      </GestureHandlerRootView>
+    </WagmiProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+
 
 export default App;

@@ -1,4 +1,4 @@
-package com.wallettest
+package com.WalletTest
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
